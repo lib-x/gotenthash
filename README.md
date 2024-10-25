@@ -62,9 +62,6 @@ if err != nil {
 - `func Hash(data []byte) [DigestSize]byte`: Compute hash value of a byte slice
 - `func HashReader(reader io.Reader) ([DigestSize]byte, error)`: Compute hash value from an io.Reader
 
-## Performance
-
-(You can add some performance test results here, such as comparisons with other hash functions)
 
 ## Contributing
 
