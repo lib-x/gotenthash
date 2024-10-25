@@ -11,6 +11,7 @@ func TestTentHash(t *testing.T) {
 		expected []byte
 	}{
 		{"Hello world!", []byte{0x15, 0x5f, 0x0a, 0x35}},
+		{"I love golang!", []byte{0xf9, 0x8c, 0x95, 0xae}},
 	}
 
 	for _, tc := range testCases {
