@@ -1,2 +1,2 @@
 # gotenthash
-TentHash in golang
+[TentHash](https://github.com/cessen/tenthash) in golang
