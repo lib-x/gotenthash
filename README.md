@@ -1,0 +1,2 @@
+# gotenthash
+TentHash in golang
