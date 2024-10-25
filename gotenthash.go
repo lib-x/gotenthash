@@ -2,6 +2,7 @@ package gotenthash
 
 import (
 	"encoding/binary"
+	"io"
 )
 
 var (
@@ -27,6 +28,7 @@ const (
 	BlockSize  = 256 / 8 // Internal block size of the hash, in bytes.
 )
 
+// TentHasher represents the state of a TentHash computation.
 type TentHasher struct {
 	state         [4]uint64
 	buf           [BlockSize]byte
@@ -34,18 +36,49 @@ type TentHasher struct {
 	messageLength uint64
 }
 
+// New creates and returns a new TentHasher computing a TentHash.
 func New() *TentHasher {
 	return &TentHasher{
 		state: defaultState,
 	}
 }
 
+// Reset resets the TentHasher to its initial state.
 func (t *TentHasher) Reset() {
 	t.state = defaultState
 	t.bufLength = 0
 	t.messageLength = 0
 }
 
+// WriteReader writes data from an io.Reader into the hash.
+// It returns the number of bytes written and any error encountered.
+func (t *TentHasher) WriteReader(r io.Reader) (int64, error) {
+	var total int64
+	buf := make([]byte, BlockSize)
+
+	for {
+		n, err := r.Read(buf)
+		if n > 0 {
+			_, writeErr := t.Write(buf[:n])
+			if writeErr != nil {
+				return total, writeErr
+			}
+			total += int64(n)
+			// No need to update messageLength here, as Write does it
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return total, err
+		}
+	}
+
+	return total, nil
+}
+
+// Write adds more data to the running hash.
+// It never returns an error.
 func (t *TentHasher) Write(data []byte) (int, error) {
 	n := len(data)
 	t.messageLength += uint64(n)
@@ -73,6 +106,9 @@ func (t *TentHasher) Write(data []byte) (int, error) {
 	return n, nil
 }
 
+// Sum appends the current hash to b and returns the resulting slice.
+// It does not change the underlying hash state, allowing for incremental hashing.
+// If b is nil, a new slice is allocated.
 func (t *TentHasher) Sum(b []byte) []byte {
 	// Create a copy of the current state
 	clone := *t
@@ -100,6 +136,26 @@ func (t *TentHasher) Sum(b []byte) []byte {
 	return append(b, digest...)
 }
 
+// SumReader calculates the hash of data from an io.Reader.
+// It returns the resulting hash as a byte slice and any error encountered.
+// This method does not change the underlying hash state.
+func (t *TentHasher) SumReader(r io.Reader) ([]byte, error) {
+	// Create a deep copy of the current state
+	clone := &TentHasher{
+		state:         t.state,
+		buf:           t.buf,
+		bufLength:     t.bufLength,
+		messageLength: t.messageLength,
+	}
+
+	_, err := clone.WriteReader(r)
+	if err != nil {
+		return nil, err
+	}
+	return clone.Sum(nil), nil
+}
+
+// xorDataIntoState XORs a block of data into the hash state.
 func xorDataIntoState(state *[4]uint64, data []byte) {
 	state[0] ^= binary.LittleEndian.Uint64(data[0:8])
 	state[1] ^= binary.LittleEndian.Uint64(data[8:16])
@@ -121,10 +177,27 @@ func mixState(state *[4]uint64) {
 	}
 }
 
+// Hash calculates the hash of the entire input data in one operation.
+// It returns the resulting hash as a fixed-size byte array.
+// This function is stateless and can be used for simple, one-shot hashing operations.
 func Hash(data []byte) [DigestSize]byte {
 	h := New()
 	h.Write(data)
+	sum := h.Sum(nil)
 	var digest [DigestSize]byte
-	copy(digest[:], h.Sum(nil))
+	copy(digest[:], sum)
 	return digest
+}
+
+// HashReader calculates the hash of data from an io.Reader.
+// It returns the resulting hash as a fixed-size byte array and any error encountered.
+func HashReader(reader io.Reader) ([DigestSize]byte, error) {
+	h := New()
+	sum, err := h.SumReader(reader)
+	if err != nil {
+		return [DigestSize]byte{}, err
+	}
+	var digest [DigestSize]byte
+	copy(digest[:], sum)
+	return digest, nil
 }
