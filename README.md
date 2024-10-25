@@ -1,6 +1,6 @@
 # gotenthash
 
-[![GoDoc](https://pkg.go.dev/github.com/lib-x/gotenthash?status.svg)](https://pkg.go.dev/github.com/lib-x/gotenthash)
+[![Go Reference](https://pkg.go.dev/badge/github.com/lib-x/gotenthash.svg)](https://pkg.go.dev/github.com/lib-x/gotenthash)
 
 gotenthash is a Go implementation of [TentHash](https://github.com/cessen/tenthash), a 160-bit non-cryptographic hash function.
 
