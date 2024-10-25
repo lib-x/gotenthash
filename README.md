@@ -1,6 +1,6 @@
 # gotenthash
 
-[![GoDoc](https://godoc.org/github.com/yourusername/gotenthash?status.svg)](https://godoc.org/github.com/yourusername/gotenthash)
+[![GoDoc](https://godoc.org/github.com/lib-x/gotenthash?status.svg)](https://godoc.org/github.com/lib-x/gotenthash)
 
 gotenthash is a Go implementation of [TentHash](https://github.com/cessen/tenthash), a 160-bit non-cryptographic hash function.
 
@@ -15,7 +15,7 @@ gotenthash is a Go implementation of [TentHash](https://github.com/cessen/tentha
 Using Go modules, you can install gotenthash with the following command:
 
 ```bash
-go get github.com/yourusername/gotenthash
+go get github.com/lib-x/gotenthash
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ go get github.com/yourusername/gotenthash
 ### Basic Usage
 
 ```go
-import "github.com/yourusername/gotenthash"
+import "github.com/lib-x/gotenthash"
 
 h := gotenthash.New()
 h.Write([]byte("Hello, world!"))
